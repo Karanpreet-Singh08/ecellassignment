@@ -1,33 +1,50 @@
-RunwayAI
+# RunwayAI
 
-A simple web app to calculate how long your startup cash will last.\n
+A simple web app to calculate how long your startup cash will last.
 
-Features
-Runway calculation (months & days)
-Net burn auto-calculation
-Multi-currency support (USD, EUR, INR, GBP, JPY)
+---
 
-Financial status:
-🟢 Safe (≥ 6 months)
-🟡 Warning (3–6 months)
-🔴 Danger (< 3 months)
-Cash burn chart (Chart.js)
+## Features
 
-Dark / Light mode
+- Runway calculation (months & days)
+- Net burn auto-calculation  
+- Multi-currency support:
+  - USD ($)
+  - EUR (€)
+  - INR (₹)
+  - GBP (£)
+  - JPY (¥)
+- Financial status:
+  - 🟢 Safe (≥ 6 months)
+  - 🟡 Warning (3–6 months)
+  - 🔴 Danger (< 3 months)
+- Cash burn chart (Chart.js)
+- Dark / Light mode
+- Shareable results
 
-Shareable results
+---
 
-Tech Stack
-HTML, CSS, JavaScript
-Chart.js
+## Tech Stack
 
-Usage
-Open RunwayCalcu.html
-Enter cash & burn rate
-Click Calculate Runway
+- HTML  
+- CSS  
+- JavaScript  
+- Chart.js  
 
-Formula
+---
+
+## Usage
+
+1. Open `RunwayCalcu.html`  
+2. Enter:
+   - Total cash  
+   - Monthly burn rate  
+   - (Optional) Revenue  
+3. Click **Calculate Runway →**
+
+---
+
+## Formula
+
+```text
 Runway = Total Cash ÷ (Burn − Revenue)
-
-Note
-Exchange rates are approximate. For estimation purposes only.
