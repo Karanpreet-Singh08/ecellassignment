@@ -1,4 +1,3 @@
-# ecellassignment
 RunwayAI
 
 A simple web app to calculate how long your startup cash will last.
