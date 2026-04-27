@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RunwayAI — Know Before You Run Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --font-display:'Syne',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-body:'DM Sans',sans-serif;
+
+  /* Dark theme */
+  --bg:#0b0c10;
+  --bg-card:#13151c;
+  --bg-input:#1a1d28;
+  --bg-input-focus:#1e2235;
+  --border:#252840;
+  --border-focus:#4a4f7a;
+  --text-primary:#f0f2ff;
+  --text-secondary:#8890b5;
+  --text-muted:#4a5080;
+  --accent:#6c7bff;
+  --accent-glow:rgba(108,123,255,0.18);
+
+  /* States */
+  --green:#22c77a;
+  --green-bg:rgba(34,199,122,0.08);
+  --green-border:rgba(34,199,122,0.25);
+  --green-glow:rgba(34,199,122,0.15);
+  --yellow:#f5c842;
+  --yellow-bg:rgba(245,200,66,0.08);
+  --yellow-border:rgba(245,200,66,0.25);
+  --yellow-glow:rgba(245,200,66,0.15);
+  --red:#ff4b6e;
+  --red-bg:rgba(255,75,110,0.08);
+  --red-border:rgba(255,75,110,0.3);
+  --red-glow:rgba(255,75,110,0.2);
+
+  --radius:14px;
+  --radius-sm:8px;
+  --shadow:0 8px 40px rgba(0,0,0,0.5);
+}
+[data-theme="light"]{
+  --bg:#f4f5fb;
+  --bg-card:#ffffff;
+  --bg-input:#eef0f8;
+  --bg-input-focus:#e8eaf5;
+  --border:#dde0f0;
+  --border-focus:#9099cc;
+  --text-primary:#0d1030;
+  --text-secondary:#4a5280;
+  --text-muted:#9099c0;
+  --accent:#4a56e8;
+  --accent-glow:rgba(74,86,232,0.12);
+  --shadow:0 8px 40px rgba(0,0,0,0.1);
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text-primary);
+  min-height:100vh;
+  transition:background 0.3s,color 0.3s;
+  overflow-x:hidden;
+}
+
+/* ===== BACKGROUND MESH ===== */
+.bg-mesh{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(108,123,255,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 85% 70%, rgba(34,199,122,0.04) 0%, transparent 70%);
+  transition:opacity 0.5s;
+}
+[data-theme="light"] .bg-mesh{
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(74,86,232,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 85% 70%, rgba(34,199,122,0.03) 0%, transparent 70%);
+}
+
+/* ===== LAYOUT ===== */
+.page{position:relative;z-index:1}
+
+/* ===== HEADER / HERO ===== */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 40px;
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:100;
+  background:rgba(11,12,16,0.7);
+  transition:background 0.3s,border-color 0.3s;
+}
+[data-theme="light"] header{background:rgba(244,245,251,0.8)}
+.logo{
+  font-family:var(--font-display);font-weight:800;font-size:1.3rem;
+  letter-spacing:-0.02em;color:var(--text-primary);
+  display:flex;align-items:center;gap:10px;
+}
+.logo-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 12px var(--accent);
+  animation:pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.85)}}
+
+.header-right{display:flex;align-items:center;gap:12px}
+.theme-btn{
+  background:var(--bg-input);border:1px solid var(--border);
+  color:var(--text-secondary);padding:8px 14px;border-radius:100px;
+  font-family:var(--font-body);font-size:0.82rem;font-weight:500;
+  cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;
+}
+.theme-btn:hover{border-color:var(--border-focus);color:var(--text-primary);background:var(--bg-input-focus)}
+
+/* ===== HERO SECTION ===== */
+.hero{
+  text-align:center;padding:64px 24px 40px;
+  max-width:680px;margin:0 auto;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--accent-glow);border:1px solid rgba(108,123,255,0.3);
+  color:var(--accent);font-family:var(--font-mono);font-size:0.72rem;
+  padding:5px 14px;border-radius:100px;margin-bottom:28px;letter-spacing:0.05em;text-transform:uppercase;
+}
+.hero h1{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.1;
+  letter-spacing:-0.03em;color:var(--text-primary);margin-bottom:16px;
+}
+.hero h1 span{
+  background:linear-gradient(135deg,var(--accent) 0%,#a78bfa 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero p{
+  font-size:1.05rem;color:var(--text-secondary);line-height:1.7;
+  font-weight:300;
+}
+
+/* ===== MAIN CALCULATOR ===== */
+.main-wrap{
+  max-width:900px;margin:0 auto;padding:0 24px 80px;
+  display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  align-items:start;
+}
+@media(max-width:700px){.main-wrap{grid-template-columns:1fr}}
+
+/* ===== CARD ===== */
+.card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px;
+  box-shadow:var(--shadow);
+  transition:background 0.3s,border-color 0.3s,box-shadow 0.3s;
+}
+.card-title{
+  font-family:var(--font-display);font-weight:700;font-size:0.9rem;
+  text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);
+  margin-bottom:20px;
+}
+
+/* ===== INPUT GROUPS ===== */
+.input-group{margin-bottom:20px}
+.input-group:last-child{margin-bottom:0}
+.input-label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:0.83rem;font-weight:500;color:var(--text-secondary);
+  margin-bottom:8px;
+}
+.currency-tag{
+  font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);
+  background:var(--bg-input);border:1px solid var(--border);
+  padding:2px 8px;border-radius:4px;
+}
+
+.input-row{display:flex;gap:8px}
+.currency-select{
+  background:var(--bg-input);border:1px solid var(--border);
+  color:var(--text-primary);font-family:var(--font-mono);font-size:0.85rem;
+  padding:0 10px;border-radius:var(--radius-sm);cursor:pointer;
+  outline:none;min-width:68px;
+  transition:border-color 0.2s,background 0.2s;
+  appearance:none;text-align:center;
+}
+.currency-select:hover,.currency-select:focus{border-color:var(--border-focus);background:var(--bg-input-focus)}
+
+.num-input{
+  flex:1;background:var(--bg-input);border:1px solid var(--border);
+  color:var(--text-primary);font-family:var(--font-mono);font-size:1rem;font-weight:500;
+  padding:12px 14px;border-radius:var(--radius-sm);outline:none;
+  transition:border-color 0.2s,background 0.2s,box-shadow 0.2s;
+}
+.num-input::placeholder{color:var(--text-muted);font-weight:300}
+.num-input:focus{
+  border-color:var(--border-focus);background:var(--bg-input-focus);
+  box-shadow:0 0 0 3px var(--accent-glow);
+}
+.num-input::-webkit-inner-spin-button,.num-input::-webkit-outer-spin-button{-webkit-appearance:none}
+
+/* ===== CALC BTN ===== */
+.calc-btn{
+  width:100%;margin-top:24px;
+  background:var(--accent);color:#fff;border:none;
+  font-family:var(--font-display);font-weight:700;font-size:1rem;
+  letter-spacing:0.01em;padding:15px 24px;border-radius:var(--radius-sm);
+  cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;
+}
+.calc-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.12),transparent);
+  opacity:0;transition:opacity 0.2s;
+}
+.calc-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(108,123,255,0.4)}
+.calc-btn:hover::before{opacity:1}
+.calc-btn:active{transform:translateY(0);box-shadow:none}
+
+/* ===== RESULT CARD ===== */
+.result-card{
+  border-radius:var(--radius);padding:28px;
+  border:1px solid var(--border);background:var(--bg-card);
+  box-shadow:var(--shadow);
+  transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.result-card.state-green{
+  border-color:var(--green-border);background:var(--green-bg);
+  box-shadow:var(--shadow),0 0 40px var(--green-glow);
+}
+.result-card.state-yellow{
+  border-color:var(--yellow-border);background:var(--yellow-bg);
+  box-shadow:var(--shadow),0 0 40px var(--yellow-glow);
+}
+.result-card.state-red{
+  border-color:var(--red-border);background:var(--red-bg);
+  box-shadow:var(--shadow),0 0 50px var(--red-glow);
+  animation:urgentPulse 2s ease-in-out infinite;
+}
+@keyframes urgentPulse{
+  0%,100%{box-shadow:var(--shadow),0 0 50px var(--red-glow)}
+  50%{box-shadow:var(--shadow),0 0 80px rgba(255,75,110,0.35)}
+}
+
+.state-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);font-size:0.72rem;font-weight:500;
+  text-transform:uppercase;letter-spacing:0.1em;
+  padding:5px 12px;border-radius:100px;
+  margin-bottom:20px;
+  transition:all 0.4s;
+}
+.state-badge-dot{width:7px;height:7px;border-radius:50%}
+.state-badge.green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.state-badge.green .state-badge-dot{background:var(--green);box-shadow:0 0 6px var(--green)}
+.state-badge.yellow{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}
+.state-badge.yellow .state-badge-dot{background:var(--yellow);box-shadow:0 0 6px var(--yellow)}
+.state-badge.red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.state-badge.red .state-badge-dot{background:var(--red);box-shadow:0 0 6px var(--red);animation:blink 1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.runway-number{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(3rem,8vw,5rem);line-height:1;letter-spacing:-0.04em;
+  margin-bottom:6px;transition:color 0.4s;
+}
+.runway-unit{
+  font-family:var(--font-mono);font-size:0.85rem;
+  color:var(--text-secondary);margin-bottom:24px;
+}
+.green-val .runway-number{color:var(--green)}
+.yellow-val .runway-number{color:var(--yellow)}
+.red-val .runway-number{color:var(--red)}
+.default-val .runway-number{color:var(--text-muted)}
+
+/* ===== STATS ROW ===== */
+.stats-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  margin-bottom:20px;
+}
+.stat-box{
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 14px;
+  transition:background 0.3s,border-color 0.3s;
+}
+.stat-label{font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.stat-value{font-family:var(--font-mono);font-size:0.9rem;font-weight:500;color:var(--text-primary)}
+
+/* ===== RUNWAY GAUGE BAR ===== */
+.gauge-wrap{margin-bottom:20px}
+.gauge-label{
+  display:flex;justify-content:space-between;
+  font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);
+  margin-bottom:7px;
+}
+.gauge-track{
+  height:8px;border-radius:100px;
+  background:var(--bg-input);overflow:hidden;position:relative;
+}
+.gauge-fill{
+  height:100%;border-radius:100px;width:0;
+  transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1), background 0.4s;
+}
+.gauge-fill.green{background:linear-gradient(90deg,#1aa861,var(--green))}
+.gauge-fill.yellow{background:linear-gradient(90deg,#c9990d,var(--yellow))}
+.gauge-fill.red{background:linear-gradient(90deg,#c41535,var(--red))}
+
+/* ===== MILESTONE BREAKDOWN ===== */
+.milestones{margin-top:20px}
+.milestone-title{
+  font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-muted);font-family:var(--font-mono);margin-bottom:12px;
+}
+.milestone-list{display:flex;flex-direction:column;gap:6px}
+.milestone-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg-input);border-radius:var(--radius-sm);
+  padding:9px 12px;font-size:0.82rem;
+  border:1px solid transparent;transition:border-color 0.3s,background 0.3s;
+}
+.milestone-row.reached{border-color:var(--green-border);background:var(--green-bg)}
+.milestone-row.reached .m-month{color:var(--green)}
+.milestone-m{font-family:var(--font-mono);color:var(--text-secondary)}
+.milestone-icon{font-size:1rem}
+.m-month{font-family:var(--font-mono);font-size:0.78rem;font-weight:500;color:var(--text-muted)}
+
+/* ===== BOTTOM FULL-WIDTH CARD: TIMELINE CHART ===== */
+.full-row{
+  max-width:900px;margin:0 auto 32px;padding:0 24px;
+}
+.chart-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px;
+  box-shadow:var(--shadow);transition:background 0.3s,border-color 0.3s;
+}
+.chart-title{
+  font-family:var(--font-display);font-weight:700;font-size:0.9rem;
+  text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);
+  margin-bottom:20px;display:flex;align-items:center;gap:8px;
+}
+.chart-wrap{overflow-x:auto}
+canvas#burnChart{max-width:100%;display:block}
+
+/* ===== TIPS CARD ===== */
+.tips-row{
+  max-width:900px;margin:0 auto 80px;padding:0 24px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+}
+@media(max-width:700px){.tips-row{grid-template-columns:1fr}}
+.tip-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  transition:all 0.2s;cursor:default;
+}
+.tip-card:hover{border-color:var(--border-focus);transform:translateY(-3px);box-shadow:var(--shadow)}
+.tip-icon{font-size:1.6rem;margin-bottom:12px}
+.tip-head{font-family:var(--font-display);font-weight:700;font-size:0.95rem;margin-bottom:7px}
+.tip-body{font-size:0.83rem;color:var(--text-secondary);line-height:1.6}
+
+/* ===== FOOTER ===== */
+footer{
+  border-top:1px solid var(--border);
+  text-align:center;padding:24px;
+  font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);
+  transition:border-color 0.3s;
+}
+
+/* ===== PLACEHOLDER STATE ===== */
+.empty-state{
+  text-align:center;padding:32px 16px;
+  color:var(--text-muted);font-size:0.9rem;line-height:1.7;
+}
+.empty-state .big-icon{font-size:2.8rem;margin-bottom:12px;opacity:0.5}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:480px){
+  header{padding:16px 20px}
+  .hero{padding:40px 16px 28px}
+  .main-wrap{padding:0 16px 60px}
+  .full-row,.tips-row{padding:0 16px}
+}
+
+/* ===== TRANSITIONS ===== */
+.result-section{animation:fadeIn 0.5s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== TOOLTIP ===== */
+.info-tip{
+  display:inline-block;width:16px;height:16px;
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:50%;font-size:0.65rem;text-align:center;
+  line-height:14px;color:var(--text-muted);cursor:help;
+  position:relative;
+}
+
+/* ===== COPY / SHARE BUTTONS ===== */
+.action-btn{
+  background:var(--bg-input);border:1px solid var(--border);
+  color:var(--text-secondary);padding:8px 14px;border-radius:100px;
+  font-family:var(--font-body);font-size:0.82rem;font-weight:500;
+  cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;
+}
+.action-btn:hover{border-color:var(--border-focus);color:var(--text-primary);background:var(--bg-input-focus)}
+.action-btn.success{border-color:var(--green-border);color:var(--green);background:var(--green-bg)}
+
+.result-actions{
+  display:flex;gap:8px;margin-top:20px;padding-top:16px;
+  border-top:1px solid var(--border);
+}
+.result-actions .action-btn{flex:1;justify-content:center;font-size:0.78rem;padding:7px 10px}
+
+.last-calc{
+  text-align:center;font-family:var(--font-mono);font-size:0.68rem;
+  color:var(--text-muted);margin-top:10px;letter-spacing:0.04em;
+}
+
+/* ===== EXCHANGE NOTICE ===== */
+.exchange-notice{
+  font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);
+  margin-top:8px;padding:8px 12px;background:var(--bg-input);
+  border-radius:var(--radius-sm);border:1px solid var(--border);
+  line-height:1.5;
+}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="page">
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    RunwayAI
+  </div>
+  <div class="header-right">
+    <button class="action-btn" id="shareBtn">🔗 Share</button>
+    <button class="theme-btn" id="themeToggle">☀️ Light Mode</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">💸 Startup Finance Tool</div>
+  <h1>Know Your <span>Runway</span><br>Before You Run Out</h1>
+  <p>Enter your cash position and burn rate to instantly visualize your financial health — with multi-currency support and real-time state feedback.</p>
+</section>
+
+<!-- MAIN CALCULATOR -->
+<div class="main-wrap">
+
+  <!-- INPUT CARD -->
+  <div class="card">
+    <div class="card-title">Financial Inputs</div>
+
+    <!-- Total Cash -->
+    <div class="input-group">
+      <div class="input-label">
+        <span>Total Cash on Hand</span>
+      </div>
+      <div class="input-row">
+        <select class="currency-select" id="currencyCash" title="Currency for cash">
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="INR">₹ INR</option>
+          <option value="GBP">£ GBP</option>
+          <option value="JPY">¥ JPY</option>
+        </select>
+        <input class="num-input" type="number" id="totalCash" placeholder="e.g. 500000" min="0" step="1000"/>
+      </div>
+    </div>
+
+    <!-- Monthly Burn Rate -->
+    <div class="input-group">
+      <div class="input-label">
+        <span>Monthly Burn Rate</span>
+      </div>
+      <div class="input-row">
+        <select class="currency-select" id="currencyBurn" title="Currency for burn rate">
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="INR">₹ INR</option>
+          <option value="GBP">£ GBP</option>
+          <option value="JPY">¥ JPY</option>
+        </select>
+        <input class="num-input" type="number" id="monthlyBurn" placeholder="e.g. 45000" min="0" step="100"/>
+      </div>
+    </div>
+
+    <!-- Monthly Revenue -->
+    <div class="input-group">
+      <div class="input-label">
+        <span>Monthly Revenue (optional)</span>
+      </div>
+      <div class="input-row">
+        <select class="currency-select" id="currencyRevenue" title="Currency for revenue">
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="INR">₹ INR</option>
+          <option value="GBP">£ GBP</option>
+          <option value="JPY">¥ JPY</option>
+        </select>
+        <input class="num-input" type="number" id="monthlyRevenue" placeholder="e.g. 12000" min="0" step="100"/>
+      </div>
+      <div class="exchange-notice" id="exchangeNotice" style="display:none"></div>
+    </div>
+
+    <!-- Result currency -->
+    <div class="input-group">
+      <div class="input-label"><span>Display Currency</span></div>
+      <select class="currency-select" id="displayCurrency" style="width:100%;padding:10px 14px;border-radius:var(--radius-sm)">
+        <option value="USD">$ USD — US Dollar</option>
+        <option value="EUR">€ EUR — Euro</option>
+        <option value="INR">₹ INR — Indian Rupee</option>
+        <option value="GBP">£ GBP — British Pound</option>
+        <option value="JPY">¥ JPY — Japanese Yen</option>
+      </select>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">Calculate Runway →</button>
+  </div>
+
+  <!-- RESULT CARD -->
+  <div class="result-card" id="resultCard">
+    <div id="resultContent">
+      <div class="empty-state">
+        <div class="big-icon">🛫</div>
+        <div>Enter your financials<br>to see your runway</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BURN CHART ROW -->
+<div class="full-row" id="chartSection" style="display:none">
+  <div class="chart-card">
+    <div class="chart-title">📉 Cash Burn Timeline</div>
+    <div class="chart-wrap">
+      <canvas id="burnChart" height="220"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- TIPS ROW -->
+<div class="tips-row">
+  <div class="tip-card">
+    <div class="tip-icon">🧮</div>
+    <div class="tip-head">Net Burn Formula</div>
+    <div class="tip-body">Net Burn = Gross Burn − Revenue.<br>Runway = Cash ÷ Net Burn. Revenue included in your inputs automatically refines this.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">📊</div>
+    <div class="tip-head">6 Month Rule</div>
+    <div class="tip-body">Most investors recommend maintaining ≥ 12 months runway before starting a fundraise. At 6 months, start the process immediately.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">⚡</div>
+    <div class="tip-head">Cut Burn Fast</div>
+    <div class="tip-body">Under 3 months? Cut non-essential costs, pause hiring, and contact investors the same week. Every day costs money.</div>
+  </div>
+</div>
+
+<footer>Built with ❤️ · RunwayAI · Know before you run out · Multi-currency · Exchange rates are illustrative</footer>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ===== EXCHANGE RATES (USD base, illustrative/approximate) =====
+const FX = {
+  USD:1, EUR:0.92, INR:83.5, GBP:0.79, JPY:156.2
+};
+const SYMBOLS = {USD:'$',EUR:'€',INR:'₹',GBP:'£',JPY:'¥'};
+const NAMES = {USD:'USD',EUR:'EUR',INR:'INR',GBP:'GBP',JPY:'JPY'};
+
+function toUSD(amount, currency){ return amount / FX[currency]; }
+function fromUSD(amount, currency){ return amount * FX[currency]; }
+function fmt(amount, currency){
+  const sym = SYMBOLS[currency];
+  const abs = Math.abs(amount);
+  // Compact format for large numbers
+  if(abs >= 1e9) return sym + (amount/1e9).toFixed(2)+'B';
+  if(abs >= 1e6) return sym + (amount/1e6).toFixed(2)+'M';
+  if(abs >= 1e3){
+    return sym + amount.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+  }
+  return sym + amount.toFixed(2);
+}
+
+// ===== THEME =====
+const themeToggle = document.getElementById('themeToggle');
+let isDark = true;
+themeToggle.addEventListener('click', ()=>{
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark?'dark':'light');
+  themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+  if(window._chart) updateChartTheme();
+});
+
+// ===== EXCHANGE NOTICE =====
+function updateExchangeNotice(){
+  const cCash = document.getElementById('currencyCash').value;
+  const cBurn = document.getElementById('currencyBurn').value;
+  const cRev = document.getElementById('currencyRevenue').value;
+  const cDisp = document.getElementById('displayCurrency').value;
+  const notice = document.getElementById('exchangeNotice');
+  const mixed = new Set([cCash,cBurn,cRev,cDisp]);
+  if(mixed.size > 1){
+    const lines = [];
+    for(const c of mixed){
+      if(c !== 'USD') lines.push(`1 USD = ${FX[c]} ${c}`);
+    }
+    notice.style.display = 'block';
+    notice.textContent = '⚡ Auto-converting: ' + (lines.length ? lines.join(' · ') : 'all in same currency');
+  } else {
+    notice.style.display = 'none';
+  }
+}
+['currencyCash','currencyBurn','currencyRevenue','displayCurrency'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', updateExchangeNotice);
+});
+
+// ===== CALCULATE =====
+document.getElementById('calcBtn').addEventListener('click', calculate);
+['totalCash','monthlyBurn','monthlyRevenue'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter') calculate(); });
+});
+
+let burnChart = null;
+
+function calculate(){
+  const cashRaw = parseFloat(document.getElementById('totalCash').value)||0;
+  const burnRaw = parseFloat(document.getElementById('monthlyBurn').value)||0;
+  const revRaw  = parseFloat(document.getElementById('monthlyRevenue').value)||0;
+  const cCash   = document.getElementById('currencyCash').value;
+  const cBurn   = document.getElementById('currencyBurn').value;
+  const cRev    = document.getElementById('currencyRevenue').value;
+  const cDisp   = document.getElementById('displayCurrency').value;
+
+  if(!cashRaw || !burnRaw){
+    showError('Please enter both Total Cash and Monthly Burn Rate.');
+    return;
+  }
+
+  // Convert everything to USD then to display currency
+  const cashUSD = toUSD(cashRaw, cCash);
+  const burnUSD = toUSD(burnRaw, cBurn);
+  const revUSD  = toUSD(revRaw, cRev);
+  const netBurnUSD = Math.max(burnUSD - revUSD, 0.01);
+
+  const cashDisp    = fromUSD(cashUSD, cDisp);
+  const burnDisp    = fromUSD(burnUSD, cDisp);
+  const revDisp     = fromUSD(revUSD, cDisp);
+  const netBurnDisp = fromUSD(netBurnUSD, cDisp);
+
+  const runwayMonths = cashUSD / netBurnUSD;
+  const runwayDays   = runwayMonths * 30.44;
+  const zeroDate     = new Date(Date.now() + runwayDays*86400000);
+
+  // Determine state
+  let state, stateLabel;
+  if(runwayMonths >= 6){ state='green'; stateLabel='SAFE ✓'; }
+  else if(runwayMonths >= 3){ state='yellow'; stateLabel='WARNING ⚠'; }
+  else { state='red'; stateLabel='DANGER ⚡'; }
+
+  renderResult({
+    runwayMonths, runwayDays, zeroDate,
+    cashDisp, burnDisp, revDisp, netBurnDisp,
+    state, stateLabel, cDisp
+  });
+  renderChart(cashUSD, netBurnUSD, runwayMonths, cDisp);
+}
+
+function showError(msg){
+  const rc = document.getElementById('resultCard');
+  rc.className='result-card';
+  document.getElementById('resultContent').innerHTML=`
+    <div class="empty-state">
+      <div class="big-icon">⚠️</div>
+      <div>${msg}</div>
+    </div>`;
+  document.getElementById('chartSection').style.display='none';
+}
+
+function renderResult({runwayMonths,runwayDays,zeroDate,cashDisp,burnDisp,revDisp,netBurnDisp,state,stateLabel,cDisp}){
+  const rc = document.getElementById('resultCard');
+  rc.className = 'result-card state-'+state;
+
+  const wholeMonths = Math.floor(runwayMonths);
+  const partDays    = Math.round((runwayMonths - wholeMonths)*30.44);
+  const displayNum  = runwayMonths >= 100 ? Math.floor(runwayMonths) : runwayMonths.toFixed(1);
+
+  // Gauge pct: 0-12+ months mapped to 0-100%
+  const gaugePct = Math.min((runwayMonths/18)*100, 100).toFixed(1);
+
+  // Milestones
+  const milestones=[
+    {label:'Breathe — 3 Months',m:3,icon:'😮‍💨'},
+    {label:'Warning cleared — 6 Months',m:6,icon:'✅'},
+    {label:'Fundraise safe — 12 Months',m:12,icon:'🚀'},
+    {label:'Default alive — 18 Months',m:18,icon:'🏆'},
+  ];
+
+  const milestonesHtml = milestones.map(ms=>{
+    const reached = runwayMonths >= ms.m;
+    const d = new Date(Date.now()+ms.m*30.44*86400000);
+    const dateStr = d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+    return `<div class="milestone-row ${reached?'reached':''}">
+      <span class="milestone-icon">${ms.icon}</span>
+      <span class="milestone-m">${ms.label}</span>
+      <span class="m-month">${reached?'✓ Reached':dateStr}</span>
+    </div>`;
+  }).join('');
+
+  const zeroStr = zeroDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+  document.getElementById('resultContent').innerHTML=`
+    <div class="result-section">
+      <div class="state-badge ${state}">
+        <div class="state-badge-dot"></div>${stateLabel}
+      </div>
+
+      <div class="${state}-val">
+        <div class="runway-number">${displayNum}</div>
+      </div>
+      <div class="runway-unit">months runway &nbsp;·&nbsp; ${Math.round(runwayDays)} days</div>
+
+      <div class="gauge-wrap">
+        <div class="gauge-label">
+          <span>0</span><span>6 mo</span><span>12 mo</span><span>18 mo</span>
+        </div>
+        <div class="gauge-track">
+          <div class="gauge-fill ${state}" id="gaugeFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Total Cash</div>
+          <div class="stat-value">${fmt(cashDisp,cDisp)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Gross Burn/mo</div>
+          <div class="stat-value">${fmt(burnDisp,cDisp)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Revenue/mo</div>
+          <div class="stat-value">${revDisp>0?fmt(revDisp,cDisp):'—'}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Net Burn/mo</div>
+          <div class="stat-value">${fmt(netBurnDisp,cDisp)}</div>
+        </div>
+      </div>
+
+      <div class="stat-box" style="margin-bottom:16px">
+        <div class="stat-label">💀 Cash Zero Date</div>
+        <div class="stat-value">${zeroStr}</div>
+      </div>
+
+      <div class="milestones">
+        <div class="milestone-title">Milestones</div>
+        <div class="milestone-list">${milestonesHtml}</div>
+      </div>
+
+      <div class="result-actions">
+        <button class="action-btn" id="copySummaryBtn">📋 Copy Summary</button>
+      </div>
+      <div class="last-calc" id="lastCalcTime"></div>
+    </div>`;
+
+  // Animate gauge
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const gf = document.getElementById('gaugeFill');
+      if(gf) gf.style.width = gaugePct+'%';
+    });
+  });
+
+  // Last calculated timestamp
+  const nowStr = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const ltEl = document.getElementById('lastCalcTime');
+  if(ltEl) ltEl.textContent = `calculated at ${nowStr}`;
+
+  // Copy Summary button
+  const copyBtn = document.getElementById('copySummaryBtn');
+  if(copyBtn){
+    copyBtn.addEventListener('click', ()=>{
+      const summary = [
+        `RunwayAI Summary`,
+        `─────────────────`,
+        `Total Cash:   ${fmt(cashDisp,cDisp)}`,
+        `Gross Burn:   ${fmt(burnDisp,cDisp)}/mo`,
+        `Revenue:      ${revDisp>0?fmt(revDisp,cDisp)+'/mo':'—'}`,
+        `Net Burn:     ${fmt(netBurnDisp,cDisp)}/mo`,
+        `─────────────────`,
+        `Runway:       ${runwayMonths.toFixed(1)} months (${Math.round(runwayDays)} days)`,
+        `Cash Zero:    ${zeroDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`,
+        `Status:       ${stateLabel}`,
+      ].join('\n');
+      navigator.clipboard.writeText(summary).then(()=>{
+        copyBtn.textContent='✓ Copied!';
+        copyBtn.classList.add('success');
+        setTimeout(()=>{ copyBtn.textContent='📋 Copy Summary'; copyBtn.classList.remove('success'); },2000);
+      });
+    });
+  }
+}
+
+// ===== CHART =====
+function renderChart(cashUSD, netBurnUSD, runwayMonths, cDisp){
+  document.getElementById('chartSection').style.display='block';
+  const months = Math.min(Math.ceil(runwayMonths)+2, 36);
+  const labels=[], data=[];
+  for(let i=0;i<=months;i++){
+    const rem = Math.max(cashUSD - netBurnUSD*i, 0);
+    labels.push(i===0?'Now':'M'+i);
+    data.push(parseFloat(fromUSD(rem, cDisp).toFixed(2)));
+  }
+
+  // Color gradient based on remaining cash
+  const maxVal = data[0];
+  const colors = data.map((v,i)=>{
+    const mo = i;
+    if(mo===0) return 'rgba(108,123,255,0.9)';
+    if(cashUSD - netBurnUSD*mo <= 0) return 'rgba(255,75,110,0.8)';
+    const ratio = v/maxVal;
+    if(ratio > 0.5) return 'rgba(34,199,122,0.8)';
+    if(ratio > 0.25) return 'rgba(245,200,66,0.8)';
+    return 'rgba(255,75,110,0.8)';
+  });
+
+  const ctx = document.getElementById('burnChart').getContext('2d');
+  if(burnChart){ burnChart.destroy(); }
+
+  const isDarkMode = document.documentElement.getAttribute('data-theme')==='dark';
+  const gridColor = isDarkMode?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.06)';
+  const textColor = isDarkMode?'#4a5080':'#9099c0';
+
+  // Area gradient
+  const gradient = ctx.createLinearGradient(0,0,0,220);
+  gradient.addColorStop(0,'rgba(108,123,255,0.25)');
+  gradient.addColorStop(1,'rgba(108,123,255,0.00)');
+
+  burnChart = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {
+          type:'line',
+          label:'Cash Remaining',
+          data,
+          borderColor:'rgba(108,123,255,0.7)',
+          backgroundColor:gradient,
+          borderWidth:2,
+          pointRadius:3,
+          pointBackgroundColor:colors,
+          tension:0.35,
+          fill:true,
+          order:1
+        },
+        {
+          type:'bar',
+          label:'Monthly Cash',
+          data,
+          backgroundColor:colors,
+          borderRadius:4,
+          order:2,
+          barPercentage:0.6,
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      animation:{duration:800,easing:'easeOutQuart'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label:ctx=>`${SYMBOLS[cDisp]}${ctx.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0})}`
+          }
+        }
+      },
+      scales:{
+        x:{
+          grid:{color:gridColor},
+          ticks:{color:textColor,font:{family:'DM Mono',size:11}}
+        },
+        y:{
+          grid:{color:gridColor},
+          ticks:{
+            color:textColor,font:{family:'DM Mono',size:11},
+            callback:v=>`${SYMBOLS[cDisp]}${v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v}`
+          }
+        }
+      }
+    }
+  });
+  window._chart = burnChart;
+}
+
+function updateChartTheme(){
+  if(!burnChart) return;
+  const isDarkMode = document.documentElement.getAttribute('data-theme')==='dark';
+  const gridColor = isDarkMode?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.06)';
+  const textColor = isDarkMode?'#4a5080':'#9099c0';
+  burnChart.options.scales.x.grid.color = gridColor;
+  burnChart.options.scales.y.grid.color = gridColor;
+  burnChart.options.scales.x.ticks.color = textColor;
+  burnChart.options.scales.y.ticks.color = textColor;
+  burnChart.update();
+}
+
+// ===== SHARE BUTTON =====
+document.getElementById('shareBtn').addEventListener('click', ()=>{
+  const params = new URLSearchParams({
+    cash:  document.getElementById('totalCash').value || '',
+    cCash: document.getElementById('currencyCash').value,
+    burn:  document.getElementById('monthlyBurn').value || '',
+    cBurn: document.getElementById('currencyBurn').value,
+    rev:   document.getElementById('monthlyRevenue').value || '',
+    cRev:  document.getElementById('currencyRevenue').value,
+    disp:  document.getElementById('displayCurrency').value,
+  });
+  const url = location.origin + location.pathname + '?' + params.toString();
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn = document.getElementById('shareBtn');
+    btn.textContent = '✓ Link Copied!';
+    btn.classList.add('success');
+    setTimeout(()=>{ btn.textContent = '🔗 Share'; btn.classList.remove('success'); }, 2200);
+  });
+});
+
+// ===== PREFILL FROM URL =====
+(function prefillFromURL(){
+  const p = new URLSearchParams(location.search);
+  const setCurr = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+  const setVal  = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+  setVal('totalCash',         p.get('cash'));
+  setCurr('currencyCash',     p.get('cCash'));
+  setVal('monthlyBurn',       p.get('burn'));
+  setCurr('currencyBurn',     p.get('cBurn'));
+  setVal('monthlyRevenue',    p.get('rev'));
+  setCurr('currencyRevenue',  p.get('cRev'));
+  setCurr('displayCurrency',  p.get('disp'));
+  if(p.get('cash') && p.get('burn')){ updateExchangeNotice(); calculate(); }
+})();
+</script>
+</body>
+</html>
